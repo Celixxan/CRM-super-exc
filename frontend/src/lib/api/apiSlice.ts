@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { mockCustomers, mockLeads, mockOpportunities } from '../mockData';
+import { mockCustomers, mockLeads, mockOpportunities, saveAllData } from '../mockData';
 import { RootState } from '../store';
 import { CustomerFormData, LeadFormData, OpportunityFormData } from '@/types';
 
@@ -30,16 +30,48 @@ export const apiSlice = createApi({
         method: 'POST',
         body: credentials,
       }),
-      transformResponse: () => ({
-        token: 'mock-token-12345',
-        user: {
-          id: '1',
-          email: 'admin@example.com',
-          firstName: 'Admin',
-          lastName: 'User',
-          role: 'admin',
-        },
+      transformResponse: () => {
+        // Mock response that matches the expected structure in login page
+        return {
+          data: {
+            login: {
+              token: 'mock-token-12345',
+              user: {
+                id: '1',
+                email: 'admin@example.com',
+                firstName: 'Admin',
+                lastName: 'User',
+                role: 'admin',
+              }
+            }
+          }
+        };
+      },
+    }),
+    
+    register: builder.mutation({
+      query: (userData) => ({
+        url: '/register',
+        method: 'POST',
+        body: userData,
       }),
+      transformResponse: () => {
+        // Mock response that matches the expected structure in register page
+        return {
+          data: {
+            register: {
+              token: 'mock-token-new-user',
+              user: {
+                id: '2',
+                email: 'user@example.com',
+                firstName: 'New',
+                lastName: 'User',
+                role: 'user',
+              }
+            }
+          }
+        };
+      },
     }),
 
     createCustomer: builder.mutation({
@@ -56,6 +88,7 @@ export const apiSlice = createApi({
           updatedAt: '2025-04-03T18:00:00Z',
         };
         mockCustomers.push(newCustomer);
+        saveAllData(); // Save to localStorage
         return { data: { customer: newCustomer } };
       },
       invalidatesTags: ['Customer']
@@ -85,6 +118,7 @@ export const apiSlice = createApi({
           updatedAt: '2025-04-03T18:00:00Z',
         };
         mockLeads.push(newLead);
+        saveAllData(); // Save to localStorage
         return { data: { lead: newLead } };
       },
       invalidatesTags: ['Lead']
@@ -114,6 +148,7 @@ export const apiSlice = createApi({
           updatedAt: '2025-04-03T18:00:00Z',
         };
         mockOpportunities.push(newOpportunity);
+        saveAllData(); // Save to localStorage
         return { data: { opportunity: newOpportunity } };
       },
       invalidatesTags: ['Opportunity']
@@ -134,6 +169,7 @@ export const apiSlice = createApi({
 // Export hooks for usage in functional components
 export const {
   useLoginMutation,
+  useRegisterMutation,
   useGetCustomersQuery,
   useCreateCustomerMutation,
   useGetLeadsQuery,

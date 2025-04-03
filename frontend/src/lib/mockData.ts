@@ -1,6 +1,8 @@
 import { Customer, Lead, Opportunity } from '@/types';
+import { loadFromLocalStorage, saveToLocalStorage } from './utils/localStorage';
 
-export const mockCustomers: Customer[] = [
+// Default mock data for customers
+const defaultCustomers: Customer[] = [
   {
     id: '1',
     firstName: 'John',
@@ -39,7 +41,13 @@ export const mockCustomers: Customer[] = [
   },
 ];
 
-export const mockLeads: Lead[] = [
+// Load customers from localStorage or use defaults if not available
+export const mockCustomers: Customer[] = typeof window !== 'undefined' 
+  ? loadFromLocalStorage<Customer[]>('crm_customers', defaultCustomers)
+  : [...defaultCustomers];
+
+// Default mock data for leads
+const defaultLeads: Lead[] = [
   {
     id: '1',
     customerId: '1',
@@ -69,7 +77,13 @@ export const mockLeads: Lead[] = [
   },
 ];
 
-export const mockOpportunities: Opportunity[] = [
+// Load leads from localStorage or use defaults if not available
+export const mockLeads: Lead[] = typeof window !== 'undefined' 
+  ? loadFromLocalStorage<Lead[]>('crm_leads', defaultLeads)
+  : [...defaultLeads];
+
+// Default mock data for opportunities
+const defaultOpportunities: Opportunity[] = [
   {
     id: '1',
     customerId: '1',
@@ -104,3 +118,17 @@ export const mockOpportunities: Opportunity[] = [
     updatedAt: '2025-04-01T14:45:00Z',
   },
 ];
+
+// Load opportunities from localStorage or use defaults if not available
+export const mockOpportunities: Opportunity[] = typeof window !== 'undefined' 
+  ? loadFromLocalStorage<Opportunity[]>('crm_opportunities', defaultOpportunities)
+  : [...defaultOpportunities];
+
+// Function to save all data to localStorage when changes are made
+export const saveAllData = (): void => {
+  if (typeof window !== 'undefined') {
+    saveToLocalStorage('crm_customers', mockCustomers);
+    saveToLocalStorage('crm_leads', mockLeads);
+    saveToLocalStorage('crm_opportunities', mockOpportunities);
+  }
+};

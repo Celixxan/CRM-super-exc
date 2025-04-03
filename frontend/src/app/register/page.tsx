@@ -12,37 +12,38 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { apiSlice } from '@/lib/api/apiSlice';
+import { useRegisterMutation } from '@/lib/api/apiSlice';
 import { setCredentials } from '@/lib/features/auth/authSlice';
 import NextLink from 'next/link';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   
   const router = useRouter();
   const dispatch = useDispatch();
-  const [login] = apiSlice.endpoints.login.useMutation();
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  };
+  const [register] = useRegisterMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     try {
-      const result = await login({ email, password }).unwrap();
-      dispatch(setCredentials(result.data.login));
+      // For demo purposes, we'll use the mock data
+      // In a real app, this would call the backend API
+      const result = await register({ name, email, password }).unwrap();
+      dispatch(setCredentials(result.data.register));
       router.push('/dashboard');
     } catch (err) {
-      setError('Invalid email or password');
+      setError('Registration failed. Please try again.');
     }
   };
 
@@ -67,7 +68,7 @@ export default function LoginPage() {
           }}
         >
           <Typography component="h1" variant="h5">
-            Sign in to CRM
+            Create an Account
           </Typography>
           <Box
             component="form"
@@ -78,14 +79,25 @@ export default function LoginPage() {
               margin="normal"
               required
               fullWidth
+              id="name"
+              label="Full Name"
+              name="name"
+              autoComplete="name"
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               id="email"
               label="Email Address"
               name="email"
               autoComplete="email"
-              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              error={!!error}
+              error={!!error && error.includes('email')}
             />
             <TextField
               margin="normal"
@@ -95,10 +107,23 @@ export default function LoginPage() {
               label="Password"
               type="password"
               id="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              error={!!error}
+              error={!!error && error.includes('Password')}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              id="confirmPassword"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              error={!!error && error.includes('Password')}
               helperText={error}
             />
             <Button
@@ -107,11 +132,11 @@ export default function LoginPage() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign In
+              Register
             </Button>
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Link component={NextLink} href="/register" variant="body2">
-                Don't have an account? Register here
+            <Box sx={{ textAlign: 'center' }}>
+              <Link component={NextLink} href="/login" variant="body2">
+                Already have an account? Sign in
               </Link>
             </Box>
           </Box>
